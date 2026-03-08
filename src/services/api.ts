@@ -1,4 +1,7 @@
 const BASE_URL = "/api";
+const ANALYZE_TIMEOUT = 5000;
+const CONFIDENCE_THRESHOLD = 0.6;
+const DEFAULT_CONFIDENCE = 0.82;
 
 export async function checkHealth() {
   const response = await fetch(`${BASE_URL}/health`);
@@ -26,6 +29,13 @@ interface AnalyzeRequest {
   user_id?: string;
 }
 
+interface AnalyzeResponse {
+  source_id: string;
+  citation_text: string;
+  confidence: number;
+  url: string;
+}
+
 export async function analyzeText(
   text: string,
   document_id?: string,
@@ -33,7 +43,7 @@ export async function analyzeText(
 ) {
   // Timeout error if response is not received within 5 seconds
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const timeoutId = setTimeout(() => controller.abort(), ANALYZE_TIMEOUT);
 
   const body: AnalyzeRequest = { text };
 
@@ -56,10 +66,20 @@ export async function analyzeText(
       throw new Error(`Analyze request failed with status ${response.status}`);
     }
 
-    return response.json();
+    // check if response confidence is below CONFIDENCE_THRESHOLD
+    const data: AnalyzeResponse = await response.json();
+    
+    if (
+      data.confidence !== undefined &&
+      (data.confidence < CONFIDENCE_THRESHOLD || data.confidence === DEFAULT_CONFIDENCE)
+    ) {
+      throw new Error("NO_MATCHING_SOURCE");
+    }
+
+    return data;
   } catch (error: any) {
     if (error.name === "AbortError") {
-      throw new Error("Analyze request timed out after 5 seconds.");
+      throw new Error("ANALYZE_TIMEOUT");
     }
     throw error;
   }

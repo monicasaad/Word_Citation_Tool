@@ -73,8 +73,10 @@ const AnalyzeButton: React.FC = () => {
       const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
       console.log("Analyze result:", result);  // take this out later
     } catch (error: any) {
-      if (error.message.includes("timed out")) {
+      if (error.message === "ANALYZE_TIMEOUT") {
         setMessage("Citation analysis timed out. Please try again.");
+      } else if (error.message === "NO_MATCHING_SOURCE") {
+        setMessage("Unable to generate citation. Try refining selection.");
       } else {
         setMessage("Analyze request failed.");
       }
