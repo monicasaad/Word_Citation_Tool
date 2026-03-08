@@ -3,6 +3,10 @@ import * as React from "react";
 import { useState } from "react";
 import { Button, Field, makeStyles, tokens } from "@fluentui/react-components";
 import { getSelectedText } from "../taskpane";
+import { analyzeText } from "../../services/api";
+
+const DOCUMENT_ID = "trustops-handbook-v10";
+const USER_ID = "candidate_1";
 
 const useStyles = makeStyles({
   analyzeContainer: {
@@ -26,6 +30,7 @@ const useStyles = makeStyles({
 
 const AnalyzeButton: React.FC = () => {
   const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const styles = useStyles();
 
   const handleAnalyze = async () => {
@@ -38,9 +43,16 @@ const AnalyzeButton: React.FC = () => {
       }
 
       setMessage("");
+      setIsLoading(true);
+
+      const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
+      console.log("Analyze result:", result);
+
     } catch (error) {
-      setMessage("Something went wrong while reading the selected text.");
-      console.error("Error getting selected text:", error);
+      setMessage("Analyze request failed.");
+      console.error("Error analyzing text:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -50,8 +62,8 @@ const AnalyzeButton: React.FC = () => {
 
       {message && <div className={styles.message}>{message}</div>}
 
-      <Button appearance="primary" size="large" onClick={handleAnalyze}>
-        Analyze
+      <Button appearance="primary" size="large" onClick={handleAnalyze} disabled={isLoading}>
+        {isLoading ? "Analyzing..." : "Analyze"}
       </Button>
     </div>
   );
