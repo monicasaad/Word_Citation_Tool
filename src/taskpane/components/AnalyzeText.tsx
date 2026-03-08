@@ -46,6 +46,21 @@ const AnalyzeButton: React.FC = () => {
         return;
       }
 
+      // Check document_id exists if a document_id is being passed to analyzeText
+      if(DOCUMENT_ID) {
+        try {
+          const document = await getDocument();
+          
+          if (document.document_id !== DOCUMENT_ID) {
+            setMessage("No information found on requested document_id.");
+            return;
+          }
+        } catch (error) {
+          setMessage("Unable to validate the requested document. Please try again.");
+          return;
+        }
+      }
+
       // Get selected text
       const selectedText = await getSelectedText();
       // Handle no text selected
@@ -54,9 +69,9 @@ const AnalyzeButton: React.FC = () => {
         return;
       }
 
+      // Analyze selected text
       const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
-      console.log("Analyze result:", result);
-
+      console.log("Analyze result:", result);  // take this out later
     } catch (error) {
       setMessage("Analyze request failed.");
       console.error("Error analyzing text:", error);
