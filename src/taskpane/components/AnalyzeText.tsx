@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { Button, Field, makeStyles, tokens } from "@fluentui/react-components";
-import { getSelectedText, insertCitationAfterSelection } from "../taskpane";
+import { getSelectedText, insertCitationAndComment } from "../taskpane";
 import { analyzeText, checkHealth, getDocument, highlightSelectedText } from "../../services/api";
 
 export interface CitationItem {
@@ -11,6 +11,7 @@ export interface CitationItem {
   citationText: string;
   confidence: number;
   url: string;
+  commentId: string;
 }
 
 interface AnalyzeButtonProps {
@@ -101,7 +102,7 @@ const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) 
       // Highlight selected text
       await highlightSelectedText();
       // Insert in-text citation after selection
-      await insertCitationAfterSelection(inText);
+      const { commentId } = await insertCitationAndComment(inText, result.source_id, result.confidence);
 
       const newCitation: CitationItem = {
         id: crypto.randomUUID(),
@@ -110,6 +111,7 @@ const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) 
         citationText: result.citation_text,
         confidence: result.confidence,
         url: result.url,
+        commentId: commentId,
       };
 
       props.onCitationCreated(newCitation);
