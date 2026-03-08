@@ -1,15 +1,11 @@
 /* global Word console */
 
-export async function insertCitationAfterSelection(inTextCitation: string): Promise<Word.Range> {
+export async function getSelectedText() {
   return Word.run(async (context) => {
     const selection = context.document.getSelection();
-
-    const insertedRange = selection.insertText(` ${inTextCitation}`, Word.InsertLocation.after);
-    insertedRange.load("text");
-
+    selection.load("text");
     await context.sync();
-
-    return insertedRange;
+    return selection.text.trim();
   });
 }
 
@@ -32,14 +28,5 @@ export async function insertCitationAndComment(
     return {
       commentId: comment.id,
     };
-  });
-}
-
-export async function getSelectedText() {
-  return Word.run(async (context) => {
-    const selection = context.document.getSelection();
-    selection.load("text");
-    await context.sync();
-    return selection.text.trim();
   });
 }
