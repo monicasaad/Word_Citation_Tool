@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { Button, Field, makeStyles, tokens } from "@fluentui/react-components";
-import { getSelectedText } from "../taskpane";
+import { getSelectedText, insertCitationAfterSelection } from "../taskpane";
 import { analyzeText, checkHealth, getDocument, highlightSelectedText } from "../../services/api";
 
 export interface CitationItem {
@@ -39,6 +39,19 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightMedium,
   },
 });
+
+function inTextCitation (citation: String) {
+  const parts = citation.split(".");
+
+  const author = parts[0]?.trim() || "Unknown";
+  // Remove parentheses around year
+  const rawYear = parts[1]?.trim() || "n.d.";
+  const year = rawYear.replace(/[()]/g, "");
+
+  const inText = `(${author}, ${year})`;
+
+  return inText;
+}
 
 const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) => {
   const [message, setMessage] = useState<string>("");
@@ -83,7 +96,12 @@ const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) 
 
       // Analyze selected text
       const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
+      // Get in-text citation
+      const inText = inTextCitation(result.citation_text);
+      // Highlight selected text
       await highlightSelectedText();
+      // Insert in-text citation after selection
+      await insertCitationAfterSelection(inText);
 
       const newCitation: CitationItem = {
         id: crypto.randomUUID(),

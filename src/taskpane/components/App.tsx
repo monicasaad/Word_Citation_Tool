@@ -7,7 +7,7 @@ import AnalyzeButton, { CitationItem } from "./AnalyzeText";
 import CitationList from "./CitationList";
 import { makeStyles } from "@fluentui/react-components";
 import { Ribbon24Regular, LockOpen24Regular, DesignIdeas24Regular } from "@fluentui/react-icons";
-import { insertText } from "../taskpane";
+import { insertCitationAfterSelection } from "../taskpane";
 
 interface AppProps {
   title: string;

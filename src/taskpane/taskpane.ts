@@ -1,16 +1,16 @@
 /* global Word console */
 
-export async function insertText(text: string) {
-  // Write text to the document.
-  try {
-    await Word.run(async (context) => {
-      let body = context.document.body;
-      body.insertParagraph(text, Word.InsertLocation.end);
-      await context.sync();
-    });
-  } catch (error) {
-    console.log("Error: " + error);
-  }
+export async function insertCitationAfterSelection(inTextCitation: string): Promise<Word.Range> {
+  return Word.run(async (context) => {
+    const selection = context.document.getSelection();
+
+    const insertedRange = selection.insertText(` ${inTextCitation}`, Word.InsertLocation.after);
+    insertedRange.load("text");
+
+    await context.sync();
+
+    return insertedRange;
+  });
 }
 
 export async function getSelectedText() {
