@@ -69,35 +69,7 @@ const CitationList: React.FC<CitationListProps> = ({ citations }) => {
         ) : (
           citations.map((citation) => (
             <div key={citation.id} className={styles.citationCard}>
-              <div className={styles.label}>Citation</div>
               <div className={styles.text}>{citation.citationText}</div>
-
-              <div className={styles.label}>Source ID</div>
-              <div className={styles.text}>{citation.sourceId}</div>
-
-              <div className={styles.label}>Selected Text</div>
-              <div className={styles.text}>{citation.selectedText}</div>
-
-              {citation.confidence !== undefined && (
-                <>
-                  <div className={styles.label}>Confidence</div>
-                  <div className={styles.text}>{citation.confidence}</div>
-                </>
-              )}
-
-              {citation.url && (
-                <>
-                  <div className={styles.label}>URL</div>
-                  <a
-                    href={citation.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={styles.link}
-                  >
-                    {citation.url}
-                  </a>
-                </>
-              )}
             </div>
           ))
         )}
