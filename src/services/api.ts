@@ -4,7 +4,7 @@ export async function checkHealth() {
   const response = await fetch(`${BASE_URL}/health`);
 
   if (!response.ok) {
-    throw new Error("Health check failed");
+    throw new Error(`Health check failed with status ${response.status}`);
   }
 
   return response.json();
@@ -14,7 +14,7 @@ export async function getDocument() {
   const response = await fetch(`${BASE_URL}/document`);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch document");
+    throw new Error(`Failed to fetch document with status ${response.status}`);
   }
 
   return response.json();
