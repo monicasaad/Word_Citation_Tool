@@ -3,7 +3,7 @@ import * as React from "react";
 import { useState } from "react";
 import { Button, Field, makeStyles, tokens } from "@fluentui/react-components";
 import { getSelectedText } from "../taskpane";
-import { analyzeText, checkHealth, getDocument } from "../../services/api";
+import { analyzeText, checkHealth, getDocument, highlightSelectedText } from "../../services/api";
 
 const DOCUMENT_ID = "trustops-handbook-v1";
 const USER_ID = "candidate_1";
@@ -71,6 +71,7 @@ const AnalyzeButton: React.FC = () => {
 
       // Analyze selected text
       const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
+      await highlightSelectedText();
       console.log("Analyze result:", result);  // take this out later
     } catch (error: any) {
       if (error.message === "ANALYZE_TIMEOUT") {

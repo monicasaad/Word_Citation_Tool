@@ -84,3 +84,12 @@ export async function analyzeText(
     throw error;
   }
 }
+
+export async function highlightSelectedText() {
+  return Word.run(async (context) => {
+    const selection = context.document.getSelection();
+    selection.font.highlightColor = "#FFF59D";
+
+    await context.sync();
+  });
+}
