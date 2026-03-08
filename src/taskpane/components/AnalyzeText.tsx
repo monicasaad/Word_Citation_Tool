@@ -5,7 +5,7 @@ import { Button, Field, makeStyles, tokens } from "@fluentui/react-components";
 import { getSelectedText } from "../taskpane";
 import { analyzeText, checkHealth, getDocument } from "../../services/api";
 
-const DOCUMENT_ID = "trustops-handbook-v10";
+const DOCUMENT_ID = "trustops-handbook-v1";
 const USER_ID = "candidate_1";
 
 const useStyles = makeStyles({
@@ -72,8 +72,12 @@ const AnalyzeButton: React.FC = () => {
       // Analyze selected text
       const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
       console.log("Analyze result:", result);  // take this out later
-    } catch (error) {
-      setMessage("Analyze request failed.");
+    } catch (error: any) {
+      if (error.message.includes("timed out")) {
+        setMessage("Citation analysis timed out. Please try again.");
+      } else {
+        setMessage("Analyze request failed.");
+      }
       console.error("Error analyzing text:", error);
     } finally {
       setIsLoading(false);
