@@ -30,3 +30,25 @@ export async function insertCitationAndComment(
     };
   });
 }
+
+export async function selectCommentById(commentId: string) {
+  return Word.run(async (context) => {
+    const comments = context.document.body.getComments();
+    comments.load("items/id");
+
+    await context.sync();
+
+    const targetComment = comments.items.find((comment) => comment.id === commentId);
+
+    if (!targetComment) {
+      return false;
+    }
+
+    const commentRange = targetComment.getRange();
+    commentRange.select();
+
+    await context.sync();
+
+    return true;
+  });
+}

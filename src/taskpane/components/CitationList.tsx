@@ -1,14 +1,7 @@
 import * as React from "react";
 import { makeStyles, tokens } from "@fluentui/react-components";
-
-interface CitationItem {
-  id: string;
-  selectedText: string;
-  sourceId: string;
-  citationText: string;
-  confidence: number;
-  url: string;
-}
+import type { CitationItem } from "./AnalyzeText";
+import { selectCommentById } from "../taskpane";
 
 interface CitationListProps {
   citations: CitationItem[];
@@ -23,6 +16,10 @@ const useStyles = makeStyles({
   title: {
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: "12px",
+  },
+  helperText: {
+    color: tokens.colorNeutralForeground3,
+    marginBottom: "10px",
   },
   scrollPane: {
     maxHeight: "300px",
@@ -50,25 +47,37 @@ const useStyles = makeStyles({
   text: {
     wordBreak: "break-word",
   },
-  link: {
-    color: tokens.colorBrandForegroundLink,
-    textDecoration: "none",
-  },
 });
 
 const CitationList: React.FC<CitationListProps> = ({ citations }) => {
   const styles = useStyles();
 
+  const handleCitationClick = async (commentId: string) => {
+    try {
+      const found = await selectCommentById(commentId);
+
+      if (!found) {
+        console.log("Could not find the linked citation comment in the document.");
+      }
+    } catch (error) {
+      console.error("Error jumping to citation location:", error);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.title}>References</div>
+      <div className={styles.helperText}>Click a reference to jump to its in-text citation.</div>
 
       <div className={styles.scrollPane}>
         {citations.length === 0 ? (
           <div className={styles.emptyState}>No references yet.</div>
         ) : (
           citations.map((citation) => (
-            <div key={citation.id} className={styles.citationCard}>
+            <div 
+              key={citation.id} className={styles.citationCard}
+              onClick={() => handleCitationClick(citation.commentId)}
+            >
               <div className={styles.text}>{citation.citationText}</div>
             </div>
           ))
