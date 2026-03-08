@@ -1,9 +1,21 @@
-
 import * as React from "react";
 import { useState } from "react";
 import { Button, Field, makeStyles, tokens } from "@fluentui/react-components";
 import { getSelectedText } from "../taskpane";
 import { analyzeText, checkHealth, getDocument, highlightSelectedText } from "../../services/api";
+
+export interface CitationItem {
+  id: string;
+  selectedText: string;
+  sourceId: string;
+  citationText: string;
+  confidence: number;
+  url: string;
+}
+
+interface AnalyzeButtonProps {
+  onCitationCreated: (citation: CitationItem) => void;
+}
 
 const DOCUMENT_ID = "trustops-handbook-v1";
 const USER_ID = "candidate_1";
@@ -28,7 +40,7 @@ const useStyles = makeStyles({
   },
 });
 
-const AnalyzeButton: React.FC = () => {
+const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) => {
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const styles = useStyles();
@@ -72,7 +84,18 @@ const AnalyzeButton: React.FC = () => {
       // Analyze selected text
       const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
       await highlightSelectedText();
-      console.log("Analyze result:", result);  // take this out later
+
+      const newCitation: CitationItem = {
+        id: crypto.randomUUID(),
+        selectedText: selectedText,
+        sourceId: result.source_id,
+        citationText: result.citation_text,
+        confidence: result.confidence,
+        url: result.url,
+      };
+
+      props.onCitationCreated(newCitation);
+
     } catch (error: any) {
       if (error.message === "ANALYZE_TIMEOUT") {
         setMessage("Citation analysis timed out. Please try again.");
