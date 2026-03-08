@@ -20,21 +20,32 @@ export async function getDocument() {
   return response.json();
 }
 
-export async function analyzeText(text: string) {
+interface AnalyzeRequest {
+  text: string;
+  document_id?: string;
+  user_id?: string;
+}
+
+export async function analyzeText(
+  text: string,
+  document_id?: string,
+  user_id?: string
+) {
+  const body: AnalyzeRequest = { text };
+
+  if (document_id) body.document_id = document_id;
+  if (user_id) body.user_id = user_id;
+
   const response = await fetch(`${BASE_URL}/analyze`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      text,
-      document_id: "trustops-handbook-v1",
-      user_id: "candidate_1",
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
-    throw new Error("Analyze request failed");
+    throw new Error(`Analyze request failed with status ${response.status}`);
   }
 
   return response.json();
