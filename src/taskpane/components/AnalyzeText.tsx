@@ -3,7 +3,7 @@ import * as React from "react";
 import { useState } from "react";
 import { Button, Field, makeStyles, tokens } from "@fluentui/react-components";
 import { getSelectedText } from "../taskpane";
-import { analyzeText } from "../../services/api";
+import { analyzeText, checkHealth } from "../../services/api";
 
 const DOCUMENT_ID = "trustops-handbook-v10";
 const USER_ID = "candidate_1";
@@ -35,14 +35,24 @@ const AnalyzeButton: React.FC = () => {
 
   const handleAnalyze = async () => {
     try {
-      const selectedText = await getSelectedText();
+      setMessage("");
 
+      // Check API connection first using health endpoint
+      try {
+        await checkHealth();
+      } catch {
+        setMessage("Failed to connect to citation service. Please try again later.");
+        return;
+      }
+
+      // Get selected text
+      const selectedText = await getSelectedText();
+      // Handle no text selected
       if (!selectedText) {
         setMessage("Please select text before analyzing.");
         return;
       }
 
-      setMessage("");
       setIsLoading(true);
 
       const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
