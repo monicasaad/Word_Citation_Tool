@@ -20,6 +20,13 @@ The add-in also allows users to:
 
 The goal of this tool is to help users quickly generate traceable citations for text that originates from known policy or documentation sources.
 
+Additional resources are included in the `docs\` directory of the project:
+  1. AI Chat History.pdf: full chat history exported into pdf
+  2. AI Usage Summary.md: Summary of AI usage and design process with AI
+  3. Project Plan.md: Initial plan created to ensure all requirements completed
+  4. sample_text.tx: Sample text that can be pasted into Word to test the add-in
+  5. Word-Citation-Add-in-Monica-Saad.docx: Full report detailing design process
+
 ---
 
 # Problem Context
