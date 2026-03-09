@@ -1,8 +1,8 @@
 import * as React from "react";
 import { useState } from "react";
 import { Button, Field, makeStyles, tokens } from "@fluentui/react-components";
-import { getSelectedText, insertCitationAndComment } from "../taskpane";
-import { analyzeText, checkHealth, getDocument, highlightSelectedText } from "../../services/api";
+import { getSelectedText, insertCitationAndComment, highlightSelectedText } from "../taskpane";
+import { analyzeText, checkHealth, getDocument } from "../../services/api";
 
 export interface CitationItem {
   id: string;

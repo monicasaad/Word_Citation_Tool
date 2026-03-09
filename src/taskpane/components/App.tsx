@@ -1,13 +1,9 @@
 import * as React from "react";
 import { useState } from "react";
 import Header from "./Header";
-import HeroList, { HeroListItem } from "./HeroList";
-import TextInsertion from "./TextInsertion";
 import AnalyzeButton, { CitationItem } from "./AnalyzeText";
 import CitationList from "./CitationList";
 import { makeStyles } from "@fluentui/react-components";
-import { Ribbon24Regular, LockOpen24Regular, DesignIdeas24Regular } from "@fluentui/react-icons";
-import { insertCitationAndComment } from "../taskpane";
 
 interface AppProps {
   title: string;
