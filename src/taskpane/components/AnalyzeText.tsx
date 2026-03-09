@@ -49,7 +49,7 @@ const useStyles = makeStyles({
  * @param citation - The full citation returned by the analyze endpoint.
  * @returns The formatted in-text citation.
  */
-function parseInTextCitation (citation: String): string {
+function parseInTextCitation (citation: string): string {
   const parts = citation.split(".");
 
   const author = parts[0]?.trim() || "Unknown";
