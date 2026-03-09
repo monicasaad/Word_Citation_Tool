@@ -277,3 +277,6 @@ Potential enhancements include:
 5. The add-in inserts the in-text citation and attaches a comment
 6. The citation appears in the reference pane
 7. Clicking a reference jumps to the corresponding citation in the document
+
+https://github.com/user-attachments/assets/16a39551-806f-4e25-a1be-f807d0625794
+
