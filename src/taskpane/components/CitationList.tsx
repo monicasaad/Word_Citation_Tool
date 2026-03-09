@@ -52,7 +52,12 @@ const useStyles = makeStyles({
 const CitationList: React.FC<CitationListProps> = ({ citations }) => {
   const styles = useStyles();
 
-  const handleCitationClick = async (commentId: string) => {
+  /**
+   * Navigates to the in-document citation comment linked to a reference item.
+   *
+   * @param commentId - The Word comment ID associated with the citation.
+   */
+  const handleCitationClick = async (commentId: string): Promise<void> => {
     try {
       const found = await selectCommentById(commentId);
 
