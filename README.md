@@ -139,6 +139,8 @@ Insert → My Add-ins → Shared Folder
 4. The reference pane will update
 5. Clicking a reference navigates to the citation comment
 
+> Note: There is sample starting text that can be used for testing which is found in `docs/sample_text.txt`
+
 ---
 
 # System Architecture
