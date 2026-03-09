@@ -69,6 +69,8 @@ const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) 
 
   /**
    * Validates that the configured document ID matches the backend document metadata.
+   *
+   * @returns A promise resolving to true if the document ID is valid; otherwise false.
    */
   const validateDocumentId = async (): Promise<boolean> => {
     if (!DOCUMENT_ID) {
@@ -88,6 +90,8 @@ const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) 
    * 5. Highlight selected text
    * 6. Insert in-text citation and comment
    * 7. Add citation to the references pane
+   *
+   * @returns void
    */
   const handleAnalyze = async (): Promise<void> => {
     try {
