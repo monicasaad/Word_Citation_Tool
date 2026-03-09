@@ -1,5 +1,5 @@
 const BASE_URL = "/api";
-const ANALYZE_TIMEOUT = 5000;
+const ANALYZE_TIMEOUT_MS = 5000;
 const CONFIDENCE_THRESHOLD = 0.6;
 const DEFAULT_CONFIDENCE = 0.82;
 
@@ -37,17 +37,23 @@ export interface AnalyzeResponse {
   url: string;
 }
 
-export async function checkHealth() {
+/**
+ * Check whether backend citation service is available.
+ */
+export async function checkHealth(): Promise<HealthResponse> {
   const response = await fetch(`${BASE_URL}/health`);
 
   if (!response.ok) {
     throw new Error(`Health check failed with status ${response.status}`);
   }
 
-  return response.json();
+  return response.json() as Promise<HealthResponse>;
 }
 
-export async function getDocument() {
+/**
+ * Fetch metadata for the source document currently exposed by the backend.
+ */
+export async function getDocument(): Promise<DocumentResponse> {
   const response = await fetch(`${BASE_URL}/document`);
 
   if (!response.ok) {
@@ -57,19 +63,34 @@ export async function getDocument() {
   return response.json();
 }
 
+/**
+ * Sends selected text to the analyze endpoint and returns citation data.
+ * 
+ * @param text - The selected document text to analyze.
+ * @param document_id - Optional identifier of the document context for the analysis.
+ * @param user_id - Optional identifier for the requesting user.
+ * 
+ * @throws Error "ANALYZE_TIMEOUT" if the request exceeds the configured timeout.
+ * @throws Error "NO_MATCHING_SOURCE" if the confidence score is below the required threshold or matches the known 
+ *         default fallback confidence.
+ */
 export async function analyzeText(
   text: string,
   document_id?: string,
   user_id?: string
-) {
-  // Timeout error if response is not received within 5 seconds
+): Promise<AnalyzeResponse> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), ANALYZE_TIMEOUT);
+  const timeoutId = setTimeout(() => controller.abort(), ANALYZE_TIMEOUT_MS);
 
-  const body: AnalyzeRequest = { text };
+  const requestBody: AnalyzeRequest = { text };
 
-  if (document_id) body.document_id = document_id;
-  if (user_id) body.user_id = user_id;
+  if (document_id) {
+    requestBody.document_id = document_id;
+  }
+
+  if (user_id) {
+    requestBody.user_id = user_id;
+  }
 
   try {
     const response = await fetch(`${BASE_URL}/analyze`, {
@@ -77,7 +98,7 @@ export async function analyzeText(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(requestBody),
       signal: controller.signal,
     });
 
@@ -87,9 +108,9 @@ export async function analyzeText(
       throw new Error(`Analyze request failed with status ${response.status}`);
     }
 
-    // check if response confidence is below CONFIDENCE_THRESHOLD
     const data: AnalyzeResponse = await response.json();
     
+    // Handle low confidence
     if (
       data.confidence !== undefined &&
       (data.confidence < CONFIDENCE_THRESHOLD || data.confidence === DEFAULT_CONFIDENCE)
@@ -98,10 +119,15 @@ export async function analyzeText(
     }
 
     return data;
-  } catch (error: any) {
-    if (error.name === "AbortError") {
+  } catch (error: unknown) {
+    // Handle request timeout
+    if (error instanceof Error && error.name === "AbortError") {
       throw new Error("ANALYZE_TIMEOUT");
     }
+
     throw error;
+  } finally {
+    // Timeout gets cleared whether the request succeeds or fails
+    clearTimeout(timeoutId);
   }
 }
