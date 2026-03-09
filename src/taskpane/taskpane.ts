@@ -9,6 +9,15 @@ export async function getSelectedText() {
   });
 }
 
+export async function highlightSelectedText() {
+  return Word.run(async (context) => {
+    const selection = context.document.getSelection();
+    selection.font.highlightColor = "#FFF59D";
+
+    await context.sync();
+  });
+}
+
 export async function insertCitationAndComment(
   inTextCitation: string,
   source_id: string,
