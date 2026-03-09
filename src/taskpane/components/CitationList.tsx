@@ -2,9 +2,11 @@ import * as React from "react";
 import { makeStyles, tokens } from "@fluentui/react-components";
 import type { CitationItem } from "./AnalyzeText";
 import { selectCommentById } from "../taskpane";
+import { CitationFormat, convertCitation } from "../../utils/citationFormat";
 
 interface CitationListProps {
   citations: CitationItem[];
+  citationFormat: CitationFormat;
 }
 
 const useStyles = makeStyles({
@@ -38,24 +40,21 @@ const useStyles = makeStyles({
     padding: "12px",
     marginBottom: "12px",
     backgroundColor: tokens.colorNeutralBackground2,
-  },
-  label: {
-    fontWeight: tokens.fontWeightSemibold,
-    marginTop: "6px",
-    marginBottom: "4px",
+    cursor: "pointer",
   },
   text: {
     wordBreak: "break-word",
   },
 });
 
-const CitationList: React.FC<CitationListProps> = ({ citations }) => {
+const CitationList: React.FC<CitationListProps> = ({ citations, citationFormat }) => {
   const styles = useStyles();
 
   /**
    * Navigates to the in-document citation comment linked to a reference item.
    *
    * @param commentId - The Word comment ID associated with the citation.
+   * @returns void
    */
   const handleCitationClick = async (commentId: string): Promise<void> => {
     try {
@@ -83,7 +82,9 @@ const CitationList: React.FC<CitationListProps> = ({ citations }) => {
               key={citation.id} className={styles.citationCard}
               onClick={() => handleCitationClick(citation.commentId)}
             >
-              <div className={styles.text}>{citation.citationText}</div>
+              <div className={styles.text}>
+                {convertCitation(citation.citationText, citationFormat)}
+              </div>
             </div>
           ))
         )}

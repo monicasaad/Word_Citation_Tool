@@ -1,21 +1,13 @@
-/* global Word console */
+/* global Word */
 
 interface InsertCitationAndCommentResult {
   commentId: string;
 }
 
-interface ReferenceEntry {
-  id: string;
-  selectedText: string;
-  sourceId: string;
-  citationText: string;
-  confidence: number;
-  url: string;
-  commentId: string;
-}
-
 /**
  * Retrieves the currently selected text from the Word document.
+ * 
+ * @returns A promise resolving to the trimmed selected text.
  */
 export async function getSelectedText(): Promise<string> {
   return Word.run(async (context) => {
@@ -30,6 +22,8 @@ export async function getSelectedText(): Promise<string> {
 
 /**
  * Highlights the currently selected text in the Word document.
+ * 
+ * @returns A promise that resolves when the highlight is applied.
  */
 export async function highlightSelectedText(): Promise<void> {
   return Word.run(async (context) => {
@@ -45,8 +39,9 @@ export async function highlightSelectedText(): Promise<void> {
  * a Word comment to the inserted citation containing the source ID and confidence score.
  *
  * @param inTextCitation - The formatted in-text citation to insert, e.g. "(Smith, 2023)".
- * @param sourceId - The source identifier returned by the analyze endpoint.
+ * @param source_id - The source identifier returned by the analyze endpoint.
  * @param confidence - The confidence score returned by the analyze endpoint.
+ * @returns A promise resolving to the created comment ID.
  */
 export async function insertCitationAndComment(
   inTextCitation: string,
@@ -73,6 +68,7 @@ export async function insertCitationAndComment(
  * Selects the document range associated with a given Word comment ID.
  *
  * @param commentId - The ID of the comment to locate.
+ * @returns A promise resolving to true if the comment was found and selected; otherwise false.
  */
 export async function selectCommentById(commentId: string): Promise<boolean> {
   return Word.run(async (context) => {
@@ -99,29 +95,41 @@ export async function selectCommentById(commentId: string): Promise<boolean> {
 /**
  * Inserts a formatted References section at the end of the document.
  *
- * Behavior:
+ * Behaviour:
  * - Adds a page break
- * - Inserts a Heading 1 title called "References"
+ * - Inserts a Heading 1 title
  * - Inserts each citation on a new line in alphabetical order
  *
- * @param citations - The citation entries to insert into the reference list.
+ * @param references - The formatted reference strings to insert into the document.
+ * @param headingText - The heading to use for the section, e.g. "References" or "Works Cited".
+ * @returns A promise that resolves when the reference list has been inserted.
  */
-export async function insertReferenceList(citations: ReferenceEntry[]): Promise<void> {
+export async function insertReferenceList(
+  references: string[],
+  headingText: string
+): Promise<void> {
+
   return Word.run(async (context) => {
-    const sortedCitations = [...citations].sort((a, b) =>
-      a.citationText.localeCompare(b.citationText)
-    );
 
     const body = context.document.body;
 
     body.insertBreak(Word.BreakType.page, Word.InsertLocation.end);
 
-    const headingRange = body.insertParagraph("References", Word.InsertLocation.end);
-    headingRange.styleBuiltIn = Word.BuiltInStyleName.heading1;
+    const heading = body.insertParagraph(
+      headingText,
+      Word.InsertLocation.end
+    );
 
-    sortedCitations.forEach((citation) => {
-      const refParagraph = body.insertParagraph(citation.citationText, Word.InsertLocation.end);
-      refParagraph.styleBuiltIn = Word.BuiltInStyleName.normal;
+    heading.styleBuiltIn = Word.BuiltInStyleName.heading1;
+
+    references.forEach((ref) => {
+
+      const paragraph = body.insertParagraph(
+        ref,
+        Word.InsertLocation.end
+      );
+
+      paragraph.styleBuiltIn = Word.BuiltInStyleName.normal;
     });
 
     await context.sync();
