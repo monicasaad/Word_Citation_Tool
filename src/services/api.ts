@@ -38,7 +38,9 @@ export interface AnalyzeResponse {
 }
 
 /**
- * Check whether backend citation service is available.
+ * Checks whether the backend citation service is reachable.
+ *
+ * @returns A promise resolving to the health response from the service.
  */
 export async function checkHealth(): Promise<HealthResponse> {
   const response = await fetch(`${BASE_URL}/health`);
@@ -51,7 +53,9 @@ export async function checkHealth(): Promise<HealthResponse> {
 }
 
 /**
- * Fetch metadata for the source document currently exposed by the backend.
+ * Retrieves metadata for the source document exposed by the backend.
+ *
+ * @returns A promise resolving to the document metadata including sections.
  */
 export async function getDocument(): Promise<DocumentResponse> {
   const response = await fetch(`${BASE_URL}/document`);
@@ -65,14 +69,20 @@ export async function getDocument(): Promise<DocumentResponse> {
 
 /**
  * Sends selected text to the analyze endpoint and returns citation data.
- * 
+ *
+ * This function also enforces additional validation rules:
+ * - The request is aborted if it exceeds the configured timeout.
+ * - The response confidence score must meet the required threshold.
+ *
  * @param text - The selected document text to analyze.
  * @param document_id - Optional identifier of the document context for the analysis.
  * @param user_id - Optional identifier for the requesting user.
- * 
+ *
+ * @returns A promise resolving to the analyzed citation data.
+ *
  * @throws Error "ANALYZE_TIMEOUT" if the request exceeds the configured timeout.
- * @throws Error "NO_MATCHING_SOURCE" if the confidence score is below the required threshold or matches the known 
- *         default fallback confidence.
+ * @throws Error "NO_MATCHING_SOURCE" if the confidence score is below the required threshold
+ *         or matches the known default fallback confidence.
  */
 export async function analyzeText(
   text: string,
@@ -112,8 +122,7 @@ export async function analyzeText(
     
     // Handle low confidence
     if (
-      data.confidence !== undefined &&
-      (data.confidence < CONFIDENCE_THRESHOLD || data.confidence === DEFAULT_CONFIDENCE)
+      data.confidence < CONFIDENCE_THRESHOLD || data.confidence === DEFAULT_CONFIDENCE
     ) {
       throw new Error("NO_MATCHING_SOURCE");
     }
