@@ -3,6 +3,40 @@ const ANALYZE_TIMEOUT = 5000;
 const CONFIDENCE_THRESHOLD = 0.6;
 const DEFAULT_CONFIDENCE = 0.82;
 
+// Request & response interface definitions
+export interface HealthResponse {
+  ok: boolean;
+  service: string;
+}
+
+export interface DocumentSection {
+  section_id: number;
+  heading: string;
+  text: string;
+}
+
+export interface DocumentResponse {
+  document_id: string;
+  title: string;
+  author: string;
+  url: string;
+  date: string;
+  sections: DocumentSection[];
+}
+
+export interface AnalyzeRequest {
+  text: string;
+  document_id?: string;
+  user_id?: string;
+}
+
+export interface AnalyzeResponse {
+  source_id: string;
+  citation_text: string;
+  confidence: number;
+  url: string;
+}
+
 export async function checkHealth() {
   const response = await fetch(`${BASE_URL}/health`);
 
@@ -21,19 +55,6 @@ export async function getDocument() {
   }
 
   return response.json();
-}
-
-interface AnalyzeRequest {
-  text: string;
-  document_id?: string;
-  user_id?: string;
-}
-
-interface AnalyzeResponse {
-  source_id: string;
-  citation_text: string;
-  confidence: number;
-  url: string;
 }
 
 export async function analyzeText(
