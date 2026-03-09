@@ -41,12 +41,20 @@ const useStyles = makeStyles({
   },
 });
 
-function inTextCitation (citation: String) {
+/**
+ * Converts an APA-style citation string into an in-text citation
+ * 
+ * Expected format: Author. (Year). Title. url
+ * 
+ * @param citation - The full citation returned by the analyze endpoint.
+ * @returns The formatted in-text citation.
+ */
+function parseInTextCitation (citation: String): string {
   const parts = citation.split(".");
 
   const author = parts[0]?.trim() || "Unknown";
-  // Remove parentheses around year
   const rawYear = parts[1]?.trim() || "n.d.";
+  // Remove parentheses around year
   const year = rawYear.replace(/[()]/g, "");
 
   const inText = `(${author}, ${year})`;
@@ -59,12 +67,34 @@ const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const styles = useStyles();
 
-  const handleAnalyze = async () => {
+  /**
+   * Validates that the configured document ID matches the backend document metadata.
+   */
+  const validateDocumentId = async (): Promise<boolean> => {
+    if (!DOCUMENT_ID) {
+      return true;
+    }
+
+    const document = await getDocument();
+    return document.document_id === DOCUMENT_ID;
+  };
+
+  /**
+   * Runs the full citation workflow:
+   * 1. Check backend health
+   * 2. Validate document ID
+   * 3. Read selected text from Word
+   * 4. Analyze selected text
+   * 5. Highlight selected text
+   * 6. Insert in-text citation and comment
+   * 7. Add citation to the references pane
+   */
+  const handleAnalyze = async (): Promise<void> => {
     try {
       setMessage("");
       setIsLoading(true);
 
-      // Check API connection first using health endpoint
+      // Confirm the citation service is available before continuing using health endpoint.
       try {
         await checkHealth();
       } catch {
@@ -72,36 +102,38 @@ const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) 
         return;
       }
 
-      // Check document_id exists if a document_id is being passed to analyzeText
-      if(DOCUMENT_ID) {
-        try {
-          const document = await getDocument();
-          
-          if (document.document_id !== DOCUMENT_ID) {
-            setMessage("No information found on requested document_id.");
-            return;
-          }
-        } catch (error) {
-          setMessage("Unable to validate the requested document. Please try again.");
+      // Confirm the configured document ID is recognized by the backend.
+      try {
+        const isValidDocument = await validateDocumentId();
+
+        if (!isValidDocument) {
+          setMessage("No information found on requested document_id.");
           return;
         }
+      } catch {
+          setMessage("Unable to validate the requested document. Please try again.");
+          return;
       }
 
-      // Get selected text
+      // Read the currently selected text from the Word document.
       const selectedText = await getSelectedText();
+
       // Handle no text selected
       if (!selectedText) {
         setMessage("Please select text before analyzing.");
         return;
       }
 
-      // Analyze selected text
+      // Send the selected text to the analyze endpoint.
       const result = await analyzeText(selectedText, DOCUMENT_ID, USER_ID);
-      // Get in-text citation
-      const inText = inTextCitation(result.citation_text);
-      // Highlight selected text
+
+      // Build the in-text citation from the full APA-style citation response.
+      const inText = parseInTextCitation(result.citation_text);
+
+      // Highlight the original selection in the document.
       await highlightSelectedText();
-      // Insert in-text citation after selection
+
+      // Insert the in-text citation after the selected text and attach a comment.
       const { commentId } = await insertCitationAndComment(inText, result.source_id, result.confidence);
 
       const newCitation: CitationItem = {
@@ -115,16 +147,21 @@ const AnalyzeButton: React.FC<AnalyzeButtonProps> = (props: AnalyzeButtonProps) 
       };
 
       props.onCitationCreated(newCitation);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message === "ANALYZE_TIMEOUT") {
+          setMessage("Citation analysis timed out. Please try again.");
+        } else if (error.message === "NO_MATCHING_SOURCE") {
+          setMessage("Unable to generate citation. Try refining selection.");
+        } else {
+          setMessage("Analyze request failed.");
+        }
 
-    } catch (error: any) {
-      if (error.message === "ANALYZE_TIMEOUT") {
-        setMessage("Citation analysis timed out. Please try again.");
-      } else if (error.message === "NO_MATCHING_SOURCE") {
-        setMessage("Unable to generate citation. Try refining selection.");
+        console.error("Error analyzing text:", error);
       } else {
         setMessage("Analyze request failed.");
+        console.error("Unknown error analyzing text:", error);
       }
-      console.error("Error analyzing text:", error);
     } finally {
       setIsLoading(false);
     }
