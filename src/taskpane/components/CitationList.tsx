@@ -18,10 +18,14 @@ const useStyles = makeStyles({
   title: {
     fontWeight: tokens.fontWeightSemibold,
     marginBottom: "12px",
+    paddingLeft: "16px",
+    paddingRight: "16px",
   },
   helperText: {
     color: tokens.colorNeutralForeground3,
     marginBottom: "10px",
+    paddingLeft: "16px",
+    paddingRight: "16px",
   },
   scrollPane: {
     maxHeight: "300px",

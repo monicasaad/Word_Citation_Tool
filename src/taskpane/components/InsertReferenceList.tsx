@@ -15,12 +15,14 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    marginTop: "30px",
+    marginTop: "10px",
   },
   instructions: {
     fontWeight: tokens.fontWeightSemibold,
-    marginTop: "20px",
+    marginTop: "10px",
     marginBottom: "10px",
+    paddingLeft: "16px",
+    paddingRight: "16px",
   },
   message: {
     marginTop: "12px",
@@ -28,6 +30,8 @@ const useStyles = makeStyles({
     color: tokens.colorPaletteRedForeground1,
     fontWeight: tokens.fontWeightMedium,
     textAlign: "center",
+    paddingLeft: "16px",
+    paddingRight: "16px",
   },
 });
 

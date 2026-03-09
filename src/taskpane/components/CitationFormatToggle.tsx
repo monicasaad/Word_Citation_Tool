@@ -11,6 +11,8 @@ const useStyles = makeStyles({
   container: {
     marginTop: "20px",
     marginLeft: "20px",
+    paddingLeft: "16px",
+    paddingRight: "16px",
   },
 });
 

@@ -36,7 +36,7 @@ const App: React.FC<AppProps> = (props: AppProps) => {
 
   return (
     <div className={styles.root}>
-      <Header logo="assets/logo-filled.png" title={props.title} message="Welcome" />
+      <Header logo="assets/logo-filled.png" title={props.title} message="Citation Manager" />
 
       <AnalyzeButton onCitationCreated={handleCitationCreated} />
 
