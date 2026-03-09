@@ -1,9 +1,9 @@
 import * as React from "react";
 import { useState } from "react";
+import { makeStyles } from "@fluentui/react-components";
 import Header from "./Header";
 import AnalyzeButton, { CitationItem } from "./AnalyzeText";
 import CitationList from "./CitationList";
-import { makeStyles } from "@fluentui/react-components";
 
 interface AppProps {
   title: string;
@@ -20,7 +20,12 @@ const App: React.FC<AppProps> = (props: AppProps) => {
 
   const [citations, setCitations] = useState<CitationItem[]>([]);
 
-  const handleCitationCreated = (citation: CitationItem) => {
+  /**
+   * Adds a newly created citation to the top of the references list.
+   *
+   * @param citation - The citation generated from the latest analyze action.
+   */
+  const handleCitationCreated = (citation: CitationItem): void => {
     setCitations((prevCitations) => [citation, ...prevCitations]);
   };
 
