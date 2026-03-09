@@ -4,6 +4,7 @@ import { makeStyles } from "@fluentui/react-components";
 import Header from "./Header";
 import AnalyzeButton, { CitationItem } from "./AnalyzeText";
 import CitationList from "./CitationList";
+import InsertReferenceList from "./InsertReferenceList";
 
 interface AppProps {
   title: string;
@@ -33,6 +34,7 @@ const App: React.FC<AppProps> = (props: AppProps) => {
     <div className={styles.root}>
       <Header logo="assets/logo-filled.png" title={props.title} message="Welcome" />
       <AnalyzeButton onCitationCreated={handleCitationCreated} />
+      <InsertReferenceList citations={citations} />
       <CitationList citations={citations} />
     </div>
   );

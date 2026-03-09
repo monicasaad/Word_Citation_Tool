@@ -4,6 +4,16 @@ interface InsertCitationAndCommentResult {
   commentId: string;
 }
 
+interface ReferenceEntry {
+  id: string;
+  selectedText: string;
+  sourceId: string;
+  citationText: string;
+  confidence: number;
+  url: string;
+  commentId: string;
+}
+
 /**
  * Retrieves the currently selected text from the Word document.
  */
@@ -83,5 +93,37 @@ export async function selectCommentById(commentId: string): Promise<boolean> {
     await context.sync();
 
     return true;
+  });
+}
+
+/**
+ * Inserts a formatted References section at the end of the document.
+ *
+ * Behavior:
+ * - Adds a page break
+ * - Inserts a Heading 1 title called "References"
+ * - Inserts each citation on a new line in alphabetical order
+ *
+ * @param citations - The citation entries to insert into the reference list.
+ */
+export async function insertReferenceList(citations: ReferenceEntry[]): Promise<void> {
+  return Word.run(async (context) => {
+    const sortedCitations = [...citations].sort((a, b) =>
+      a.citationText.localeCompare(b.citationText)
+    );
+
+    const body = context.document.body;
+
+    body.insertBreak(Word.BreakType.page, Word.InsertLocation.end);
+
+    const headingRange = body.insertParagraph("References", Word.InsertLocation.end);
+    headingRange.styleBuiltIn = Word.BuiltInStyleName.heading1;
+
+    sortedCitations.forEach((citation) => {
+      const refParagraph = body.insertParagraph(citation.citationText, Word.InsertLocation.end);
+      refParagraph.styleBuiltIn = Word.BuiltInStyleName.normal;
+    });
+
+    await context.sync();
   });
 }
